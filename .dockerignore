@@ -1,0 +1,36 @@
+# Node
+**/node_modules
+**/dist
+**/build
+**/npm-debug.log
+**/.npm
+
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+**/venv
+**/.venv
+
+# Git / IDE
+**/.git
+**/.gitignore
+**/.vscode
+**/.idea
+
+# Ignore git and local Docker files
+.git/
+.gitignore
+Dockerfile
+cloudbuild.yaml
+
+# Env / secrets
+**/.env
+**/*.key
+
+# Local GCS retry buffer (runtime artifact)
+**/.pending_gcs
+
+# Local SERP JSON (runtime artifact)
+backend/serp_data

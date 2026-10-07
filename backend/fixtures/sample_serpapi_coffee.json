@@ -1,0 +1,29 @@
+{
+  "search_metadata": {
+    "id": "695925908c24bd247f1be798",
+    "status": "Success"
+  },
+  "search_parameters": {
+    "engine": "google",
+    "q": "Coffee",
+    "location_requested": "Austin, Texas, United States",
+    "google_domain": "google.com",
+    "device": "desktop"
+  },
+  "immersive_products": [
+    {"category": "Popular products", "source": "Walmart", "title": "Folgers Classic Roast Ground Coffee", "rating": 4.6, "reviews": 16000, "price": "$13.86", "extracted_price": 13.86, "original_price": "$21", "extracted_original_price": 21, "extensions": ["34% OFF"]},
+    {"category": "Popular products", "source": "Sam's Club", "title": "Maxwell House Original Roast Ground Coffee", "rating": 4.5, "reviews": 7000, "price": "$20.44", "extracted_price": 20.44},
+    {"category": "Popular products", "source": "Walgreens.com", "title": "Nescafe Clasico Dark Roast Instant Coffee", "rating": 4.6, "reviews": 5800, "price": "$7.99", "extracted_price": 7.99, "extensions": ["40% OFF"]},
+    {"category": "Popular products", "source": "Walmart", "title": "Dunkin Donuts Ground Coffee Original Blend", "rating": 4.6, "reviews": 8800, "price": "$23.42", "extracted_price": 23.42, "extensions": ["21% OFF"]},
+    {"category": "Popular products", "source": "Black Rifle Coffee Company", "title": "Black Rifle Coffee Company Gunship Coffee", "rating": 4.8, "reviews": 692, "price": "$16.99", "extracted_price": 16.99, "delivery": "Free delivery on $75+"},
+    {"category": "Popular products", "source": "Walmart", "title": "Folgers Ground Coffee 100% Colombian", "rating": 4.2, "reviews": 2500, "price": "$9.57", "extracted_price": 9.57, "extensions": ["40% OFF"]},
+    {"category": "Popular products", "source": "Bass Pro Shops", "title": "Black Rifle Coffee Company Freedom Roast Whole Bean Coffee", "rating": 4.8, "reviews": 776, "price": "$17.49", "extracted_price": 17.49, "delivery": "Free delivery on $50+"},
+    {"category": "Popular products", "source": "Walmart", "title": "Bustelo Coffee Espresso", "rating": 4.7, "reviews": 7100, "price": "$6.62", "extracted_price": 6.62, "original_price": "$13", "extracted_original_price": 13, "extensions": ["48% OFF"]}
+  ],
+  "organic_results": [
+    {"position": 1, "title": "Coffee", "link": "https://en.wikipedia.org/wiki/Coffee", "snippet": "Coffee is a beverage brewed from roasted, ground coffee beans.", "source": "Wikipedia"},
+    {"position": 5, "title": "Fara Coffee - Austin", "link": "https://www.faracoffee.com/", "snippet": "Through the Fara Foundation, we give part of our proceeds back.", "rich_snippet": {"bottom": {"extensions": ["Free delivery", "30-day returns"]}}, "source": "Fara Coffee"},
+    {"position": 6, "title": "Figure 8 Coffee Purveyors: Best Coffee Roasters in Texas", "link": "https://www.figure8coffeepurveyors.com/", "snippet": "Best Coffee Roasters in Texas.", "rich_snippet": {"bottom": {"detected_extensions": {"price_from": 20, "price_to": 28, "currency": "$"}, "extensions": ["$20 to $28", "Free delivery"]}}, "source": "Figure 8 Coffee Purveyors"},
+    {"position": 8, "title": "Scooter's Coffee | Be Amazing", "link": "https://www.scooterscoffee.com/", "snippet": "Subscribe to Scooter's Coffee delivery.", "rich_snippet": {"bottom": {"extensions": ["Free delivery over $39"]}}, "source": "Scooter's Coffee"}
+  ]
+}

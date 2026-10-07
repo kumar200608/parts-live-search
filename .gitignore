@@ -1,0 +1,44 @@
+# ---- OS / editor junk ----
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ---- Secrets / environment ----
+.env
+.env.*
+!.env.example
+*.key
+*-service-account*.json
+credentials.json
+service_account.json
+ser api*
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+venv_*/
+env/
+
+# ---- Node / frontend build ----
+node_modules/
+frontend/build/
+frontend/dist/
+dist/
+
+# ---- Google Cloud SDK (should never be committed) ----
+gcloud auth application-default login/
+
+# ---- Local run artifacts ----
+debug_screenshots/
+*.log
+backend/.pending_gcs/
+backend/serp_data/
+recovered_last_batch*

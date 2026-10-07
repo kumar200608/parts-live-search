@@ -1,0 +1,184 @@
+steps:
+  # 1. Set workspace permissions
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - a+w
+      - /workspace
+    entrypoint: chmod
+    env:
+      - 'HTTPS_PROXY=http://internet.gcp.ford.com:83'
+      - 'HTTP_PROXY=http://internet.gcp.ford.com:83'
+      - 'NO_PROXY=.ford.com,.googleapis.com,.google.internal'
+
+  # 2. Use crane to download node:20-slim (React frontend build stage)
+  - name: gcr.io/go-containerregistry/crane:cloudbuild_cache
+    id: pull-node
+    env:
+      - 'HTTPS_PROXY=http://internet.gcp.ford.com:83'
+      - 'HTTP_PROXY=http://internet.gcp.ford.com:83'
+      - 'NO_PROXY=.ford.com,.googleapis.com,.google.internal'
+      - 'no_proxy=.ford.com,.googleapis.com,.google.internal'
+    args:
+      - pull
+      - 'node:20-slim'
+      - /workspace/node-image.tar
+
+  # 3. Use crane to download python:3.12-slim (production stage)
+  - name: gcr.io/go-containerregistry/crane:cloudbuild_cache
+    id: pull-python
+    env:
+      - 'HTTPS_PROXY=http://internet.gcp.ford.com:83'
+      - 'HTTP_PROXY=http://internet.gcp.ford.com:83'
+      - 'NO_PROXY=.ford.com,.googleapis.com,.google.internal'
+      - 'no_proxy=.ford.com,.googleapis.com,.google.internal'
+    args:
+      - pull
+      - 'python:3.12-slim'
+      - /workspace/python-image.tar
+
+  # 4. Load node:20-slim into the local Docker registry
+  - name: gcr.io/cloud-builders/docker
+    id: load-node
+    args: [load, --input, "/workspace/node-image.tar"]
+    waitFor: ["pull-node"]
+
+  # 5. Load python:3.12-slim into the local Docker registry
+  - name: gcr.io/cloud-builders/docker
+    id: load-python
+    args: [load, --input, "/workspace/python-image.tar"]
+    waitFor: ["pull-python"]
+
+  # 6. Image Build (multi-stage: node:20-slim -> python:3.12-slim)
+  - name: gcr.io/cloud-builders/docker
+    id: image-build
+    args:
+      - build
+      - "--build-arg"
+      - "http_proxy=${_HTTP_PROXY}"
+      - "--build-arg"
+      - "https_proxy=${_HTTPS_PROXY}"
+      - "--build-arg"
+      - "no_proxy=${_NO_PROXY}"
+      - "-t"
+      - "${_IMAGE_NAME}:${BUILD_ID}"
+      - "-t"
+      - "${_IMAGE_NAME}:latest"
+      - "-f"
+      - Dockerfile
+      - .
+    dir: "part_pricing/part_pricing_ui_serp_na_v1"
+
+    waitFor: ["load-node", "load-python"]
+
+  # 7. Image Push
+  - name: gcr.io/cloud-builders/docker
+    id: image-push
+    args:
+      - push
+      - "${_IMAGE_NAME}:${BUILD_ID}"
+    waitFor: ["image-build"]
+
+  # 7b. Push :latest tag
+  - name: gcr.io/cloud-builders/docker
+    id: image-push-latest
+    args:
+      - push
+      - "${_IMAGE_NAME}:latest"
+    waitFor: ["image-build"]
+
+  # 8. Cloud Run Service Deploy with IAP enabled
+  - name: gcr.io/cloud-builders/gcloud
+    id: deploy-cloudrun-service
+    args:
+      - run
+      - deploy
+      - "${_SERVICE_NAME}"
+      - "--no-cpu-throttling"
+      - "--image"
+      - "${_IMAGE_NAME}:${BUILD_ID}"
+      - "--service-account"
+      - "${_SERVICEACCOUNT}"
+      - "--project"
+      - "${_PROJECT_ID}"
+      - "--memory"
+      - "4Gi"
+      - "--cpu"
+      - "2"
+      - "--port"
+      - "8080"
+      - "--concurrency"
+      - "1"
+      - "--vpc-egress"
+      - all-traffic
+      - "--vpc-connector"
+      - "${_VPC_CONNECTOR}"
+      - "--region"
+      - "${_REGION}"
+      - "--ingress"
+      - "internal-and-cloud-load-balancing"
+      - "--timeout"
+      - "3600s"
+      - "--no-allow-unauthenticated"
+      - "--iap"
+      - "--min-instances"
+      - "1"
+      - "--max-instances"
+      - "100"
+      - "--set-env-vars"
+      - "PYTHONUNBUFFERED=1,ENVIRONMENT=${_APP_ENVIRONMENT},GCP_PROJECT=${_PROJECT_ID},TASKS_REGION=${_REGION},TASKS_INVOKER_SA=${_SERVICEACCOUNT},SERP_DATA_GCS_MODE=native,SERPAPI_TRUST_ENV=1"
+      - "--no-use-http2"
+      - "--command"
+      - ""
+      - "--args"
+      - ""
+      - "--set-secrets"
+      - "SERPAPI_API_KEY=projects/798978834772/secrets/serpapi-api-key:latest"
+    waitFor: ["image-push", "image-push-latest"]
+
+  # 9. Grant Ford domain users access via IAP (service-level binding)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'iap-access-ford-domain'
+    args:
+      - 'gcloud'
+      - 'iap'
+      - 'web'
+      - 'add-iam-policy-binding'
+      - '--project=${_PROJECT_ID}'
+      - '--region=${_REGION}'
+      - '--resource-type=cloud-run'
+      - '--service=${_SERVICE_NAME}'
+      - '--member=domain:ford.com'
+      - '--role=roles/iap.httpsResourceAccessor'
+    waitFor: ['deploy-cloudrun-service']
+
+logsBucket: "${_LOGS_BUCKET}"
+
+serviceAccount: "projects/${_PROJECT_ID}/serviceAccounts/sa-cldbld@${_PROJECT_ID}.iam.gserviceaccount.com"
+
+gitConfig:
+  http:
+    proxySecretVersionName: "projects/798978834772/secrets/cloudbuild_proxy_secret/versions/1"
+
+options:
+  logging: GCS_ONLY
+  workerPool: "projects/ford-158dd864a0d0bbb6f103ff24/locations/us-central1/workerPools/workerpool-app-us-central1"
+  env:
+    - "http_proxy=http://internet.gcp.ford.com:83"
+    - "https_proxy=http://internet.gcp.ford.com:83"
+    - "no_proxy=127.0.0.1,0.0.0.0,::1,localhost,.ford.com,.local,.testing,.internal,.googleapis.com,.google.internal,19.0.0.0/8,136.1.0.0/16,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+  substitution_option: "ALLOW_LOOSE"
+
+substitutions:
+  _HTTP_PROXY: http://internet.gcp.ford.com:83
+  _HTTPS_PROXY: http://internet.gcp.ford.com:83
+  _NO_PROXY: .ford.com,.googleapis.com,.google.internal
+  _PROJECT_ID: "ford-5ae865a4a2f14ba62fcc8c2d"
+  _REGION: "us-central1"
+  _SERVICEACCOUNT: "sa-verai-service-account@ford-5ae865a4a2f14ba62fcc8c2d.iam.gserviceaccount.com"
+  _APP_ENVIRONMENT: "dev"
+  _IMAGE_NAME: "us-central1-docker.pkg.dev/ford-5ae865a4a2f14ba62fcc8c2d/cloud-run-source-deploy/parts-ai-na-ui-dev"
+  _SERVICE_NAME: "parts-ai-na-ui-dev"
+  _VPC_CONNECTOR: "projects/prj-pp-gen-preprod-net-acc7/locations/us-central1/connectors/preprod-gen-central1"
+  _LOGS_BUCKET: "gs://bkt-tfstate-m1-enableai-d"
+ 
+timeout: 2500s

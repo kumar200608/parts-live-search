@@ -1,0 +1,18 @@
+# Configuration for the NA SERP AI backend.
+#
+# The SerpApi key is stored in Google Cloud Secret Manager, so a local .env is
+# NOT required. At runtime the key is fetched with the same impersonated service
+# account + restricted-VIP path used for GCS uploads (see gcs_storage.py), so it
+# works from a local dev machine (via `gcloud auth login`) and inside the
+# VPC-SC perimeter alike.
+
+# GCP project that owns the buckets / BigQuery datasets used by this backend.
+PROJECT: ford-5ae865a4a2f14ba62fcc8c2d
+LOCATION: us-central1
+
+# SerpApi (Google Search API) private key — GCP Secret Manager resource name.
+# "/versions/latest" is appended automatically when omitted.
+SERPAPI_SECRET_NAME: projects/798978834772/secrets/serpapi-api-key
+
+# Default location used for Google Shopping / organic queries.
+SERPAPI_LOCATION: Dearborn, Michigan, United States

@@ -108,7 +108,7 @@ Common environment variables:
 
 | Variable | Purpose | Default |
 | --- | --- | --- |
-| `GCP_PROJECT` | Project for GCS / BigQuery | `ford-5ae865a4a2f14ba62fcc8c2d` |
+| `GCP_PROJECT` | Project for GCS / BigQuery | `` |
 | `BQ_DATASET` / `BQ_TABLE` | Bulk pipeline landing table | `part_pricing_landing` / `na_retailers_brand_parts` |
 | `COMPOSER_API_URL` / `COMPOSER_IAP_CLIENT_ID` | Airflow DAG trigger (bulk) | empty |
 | `LKQ_LATITUDE` / `LKQ_LONGITUDE` | Default location for LKQ search | `38.742271` / `-97.262715` |
@@ -202,7 +202,7 @@ docker build -t na-parts-ui .
 
 # Run
 docker run --rm -p 8080:8080 \
-  -e GCP_PROJECT=ford-5ae865a4a2f14ba62fcc8c2d \
+  -\
   na-parts-ui
 # App: http://localhost:8080
 ```
